@@ -17,7 +17,7 @@ $formConfig is a central configuration array that acts as the single source of t
 (name, label, input type, default/hardcoded test value), the overall status message ('You have been added' / 'There is already a record'), and a reference to masterStatus.
 Rather than scattering field names as loose strings throughout index.php, $formConfig lets the form loop over its own definition — you can add or remove a field in one place and the rest of the 
 code adapts automatically.
-5. What is the purpose of masterStatus['error']?
+5. What is the purpose of masterStatus['error']? How does it coordinate validation across multiple form fields?
 masterStatus['error'] is a single Boolean flag that aggregates the validation result of all fields. Each individual setError() call not only stores a per-field message
 but also sets this flag to true. The insert logic then only checks this one flag — it doesn't need to inspect every field individually. This design means validation and insertion logic are cleanly
 decoupled: any number of fields can register errors, and only one guard (if (!$masterStatus['error'])) decides whether the record goes into the database.
