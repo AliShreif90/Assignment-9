@@ -1,0 +1,24 @@
+Assignment 9-Answers to the Questions
+1. Why does StickyForm extend Validation instead of including validation logic directly?
+StickyForm extends Validation due to Single Responsibility Principle. In other words, each class does one job. Validation owns only the regex rules (what makes input valid), 
+while StickyForm owns only the form state (field values, error messages, submission detection). One object in index.php can do both jobs without duplicating regex code due to the extension 
+of Validation by StickyForm. This extension makes Validation reusable independently. In other words, we could use it in a Command Line Interface (CLI) script or Application Programming
+Interface (API) with no form at all.
+2. What does "sticky form" mean, and how does it improve UX?
+A sticky form re-populates its input fields with whatever the user previously typed after a failed submission. Without stickiness, every validation error wipes the form blank, 
+and the user must retype everything from scratch. With stickiness, only the invalid fields need to be corrected — a major usability improvement, especially on long forms. 
+The "sticky" behavior is achieved by echoing $_POST values back into each input's value attribute.
+3. Describe the validation process — when does it happen and what if it fails?
+Validation runs on POST submission only, in index.php after the form is submitted. The process is sequential: name → email → password complexity → confirm password complexity
+→ passwords match → duplicate email. If any check fails, StickyForm::setError() stores the error message for that field and flips masterStatus['error'] to true. At the end of the chain,
+if masterStatus['error'] is true, the insert is skipped, the form re-renders with the user's values still in place, and red error messages appear below the offending fields.
+4. What is the purpose of $formConfig?
+$formConfig is a central configuration array that acts as the single source of truth for the form's metadata and runtime state. It stores: the field definitions
+(name, label, input type, default/hardcoded test value), the overall status message ('You have been added' / 'There is already a record'), and a reference to masterStatus.
+Rather than scattering field names as loose strings throughout index.php, $formConfig lets the form loop over its own definition — you can add or remove a field in one place and the rest of the 
+code adapts automatically.
+5. What is the purpose of masterStatus['error']?
+masterStatus['error'] is a single Boolean flag that aggregates the validation result of all fields. Each individual setError() call not only stores a per-field message
+but also sets this flag to true. The insert logic then only checks this one flag — it doesn't need to inspect every field individually. This design means validation and insertion logic are cleanly
+decoupled: any number of fields can register errors, and only one guard (if (!$masterStatus['error'])) decides whether the record goes into the database.
+
